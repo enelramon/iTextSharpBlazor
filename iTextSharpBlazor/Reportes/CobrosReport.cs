@@ -41,13 +41,22 @@ namespace iTextSharpBlazor.Reportes
                 new Cobros(1, DateTime.Now, "Oliver ", 5000),
                 new Cobros(2, DateTime.Now, "Juan   ", 4000),
                 new Cobros(3, DateTime.Now, "Pedro  ", 6000),
+                new Cobros(4, DateTime.Now, "Martin ", 7000),
+            new Cobros(2, DateTime.Now, "Juan   ", 4000),
+                new Cobros(3, DateTime.Now, "Pedro  ", 6000),
+                new Cobros(4, DateTime.Now, "Martin ", 7000),
+                new Cobros(2, DateTime.Now, "Juan   ", 4000),
+                new Cobros(3, DateTime.Now, "Pedro  ", 6000),
+                new Cobros(4, DateTime.Now, "Martin ", 7000),
+            new Cobros(2, DateTime.Now, "Juan   ", 4000),
+                new Cobros(3, DateTime.Now, "Pedro  ", 6000),
                 new Cobros(4, DateTime.Now, "Martin ", 7000)
         };
 
         public byte[] Reporte()
         {
-            document = new Document(PageSize.LETTER, 25f, 25f, 20f, 20f);
-            pdfTable = new pdfTable(columnas);
+            document = new Document(PageSize.Letter, 25f, 25f, 20f, 20f);
+            pdfTable = new PdfPTable(columnas);
 
             pdfTable.WidthPercentage = 100;
             pdfTable.HorizontalAlignment = Element.ALIGN_LEFT;
@@ -76,13 +85,7 @@ namespace iTextSharpBlazor.Reportes
             return memoryStream.ToArray();
         }
         private void ReportHeader()
-        {
-            pdfCell = new PdfPCell(this.AddLogo());
-            pdfCell.Colspan = 1;
-            pdfCell.Border = 0;
-            pdfTable.AddCell(pdfCell);
-
-
+        {           
             pdfCell = new PdfPCell(this.setPageTitle());
             pdfCell.Colspan = columnas;
             pdfCell.Border = 0;
@@ -91,28 +94,9 @@ namespace iTextSharpBlazor.Reportes
             pdfTable.CompleteRow();
         }
 
-        private pdfTable AddLogo()
+        private PdfPTable setPageTitle()
         {
-            pdfTable pdfTable = new pdfTable(1);
-
-            string rutaLogo = Directory.GetCurrentDirectory() + @"\wwwroot\images\Logo.png";
-            Image image = Image.GetInstance(rutaLogo);
-
-            pdfCell = new PdfPCell(image);
-            pdfCell.HorizontalAlignment = Element.ALIGN_LEFT;
-            pdfCell.Colspan = 1;
-            pdfCell.Border = 0;
-            pdfCell.ExtraParagraphSpace = 0;
-            pdfTable.AddCell(pdfCell);
-
-            pdfTable.CompleteRow();
-
-            return pdfTable;
-        }
-
-        private pdfTable setPageTitle()
-        {
-            pdfTable pdfTable = new pdfTable(2);
+            PdfPTable pdfTable = new PdfPTable(2);
 
             fontStyle = FontFactory.GetFont("Calibri", 18f, 1);
             fontFecha = FontFactory.GetFont("Calibri", 10f, 1);
@@ -169,25 +153,25 @@ namespace iTextSharpBlazor.Reportes
             pdfCell = new PdfPCell(new Phrase("ID", fontStyle));
             pdfCell.HorizontalAlignment = Element.ALIGN_CENTER;
             pdfCell.VerticalAlignment = Element.ALIGN_MIDDLE;
-            pdfCell.BackgroundColor = BaseColor.LIGHT_GRAY;
+            pdfCell.BackgroundColor = BaseColor.LightGray;
             pdfTable.AddCell(pdfCell);
 
             pdfCell = new PdfPCell(new Phrase("Fecha", fontStyle));
             pdfCell.HorizontalAlignment = Element.ALIGN_CENTER;
             pdfCell.VerticalAlignment = Element.ALIGN_MIDDLE;
-            pdfCell.BackgroundColor = BaseColor.LIGHT_GRAY;
+            pdfCell.BackgroundColor = BaseColor.LightGray;
             pdfTable.AddCell(pdfCell);
 
             pdfCell = new PdfPCell(new Phrase("Cliente", fontStyle));
             pdfCell.HorizontalAlignment = Element.ALIGN_CENTER;
             pdfCell.VerticalAlignment = Element.ALIGN_MIDDLE;
-            pdfCell.BackgroundColor = BaseColor.LIGHT_GRAY;
+            pdfCell.BackgroundColor = BaseColor.LightGray;
             pdfTable.AddCell(pdfCell);
 
             pdfCell = new PdfPCell(new Phrase("Monto", fontStyle));
             pdfCell.HorizontalAlignment = Element.ALIGN_CENTER;
             pdfCell.VerticalAlignment = Element.ALIGN_MIDDLE;
-            pdfCell.BackgroundColor = BaseColor.LIGHT_GRAY;
+            pdfCell.BackgroundColor = BaseColor.LightGray;
             pdfTable.AddCell(pdfCell);
 
             pdfTable.CompleteRow();
@@ -205,20 +189,21 @@ namespace iTextSharpBlazor.Reportes
                 pdfCell.BackgroundColor = BaseColor.White;
                 pdfTable.AddCell(pdfCell);
 
+ pdfCell = new PdfPCell(new Phrase(item.Fecha.ToString("dd/MM/yyyy"), _fontStyle));
+                pdfCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                pdfCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                pdfCell.BackgroundColor = BaseColor.White;
+                pdfTable.AddCell(pdfCell);
+
                 pdfCell = new PdfPCell(new Phrase(item.Cliente, _fontStyle));
                 pdfCell.HorizontalAlignment = Element.ALIGN_CENTER;
                 pdfCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                 pdfCell.BackgroundColor = BaseColor.White;
                 pdfTable.AddCell(pdfCell);
 
-                pdfCell = new PdfPCell(new Phrase(item.Fecha.ToString("dd/MM/yyyy"), _fontStyle));
-                pdfCell.HorizontalAlignment = Element.ALIGN_CENTER;
-                pdfCell.VerticalAlignment = Element.ALIGN_MIDDLE;
-                pdfCell.BackgroundColor = BaseColor.White;
-                pdfTable.AddCell(pdfCell);
-
+               
                 pdfCell = new PdfPCell(new Phrase(item.Monto.ToString("N2"), _fontStyle));
-                pdfCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                pdfCell.HorizontalAlignment = Element.ALIGN_RIGHT;
                 pdfCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                 pdfCell.BackgroundColor = BaseColor.White;
                 pdfTable.AddCell(pdfCell);
@@ -247,7 +232,10 @@ namespace iTextSharpBlazor.Reportes
             pdfCell.Border = 0;
             pdfTable.AddCell(pdfCell);
 
-            pdfCell = new PdfPCell(new Phrase(" ", fontStyle));
+            double total ;
+            total = listaCobros.Sum(c => c.Monto);
+
+            pdfCell = new PdfPCell(new Phrase(total.ToString("N2"), fontStyle));
             pdfCell.HorizontalAlignment = Element.ALIGN_CENTER;
             pdfCell.VerticalAlignment = Element.ALIGN_MIDDLE;
             pdfCell.BackgroundColor = BaseColor.White;
