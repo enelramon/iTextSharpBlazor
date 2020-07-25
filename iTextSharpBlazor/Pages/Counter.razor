@@ -6,16 +6,31 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+@if (Data is { })
+{
+    <object data="@pdfContent" width="500" height="600"></object>
+}
+
 @code {
     private int currentCount = 0;
 
-    private async Task  IncrementCount()
+    byte[] Data;
+    string pdfContent = "";
+
+   
+
+    private async Task IncrementCount()
     {
         currentCount++;
         iTextSharpBlazor.Reportes.CobrosReport cobros = new Reportes.CobrosReport();
 
-        await js.InvokeVoidAsync("SaveAsFile", "Reporte de Clientes.pdf", Convert.ToBase64String(cobros.Reporte()));
-        
+        Data = cobros.Reporte();
+
+        pdfContent = "data:application/pdf;base64,";
+        pdfContent += System.Convert.ToBase64String(Data);
+
+        //await js.InvokeVoidAsync("SaveAsFile", "Reporte de Clientes.pdf", Convert.ToBase64String(cobros.Reporte()));
+
 
     }
 }
